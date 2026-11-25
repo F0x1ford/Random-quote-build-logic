@@ -12,7 +12,9 @@ app.get("/Return_Quote", async (req, res) => {
 
     const data = await response.json();
 
-    res.send(data.quote);
+    res.json({
+  "value": data.quote
+});
   } catch (error) {
     res.status(500).send("Erreur API");
   }
@@ -26,7 +28,9 @@ app.post("/Return_Quote", async (req, res) => {
 
     const data = await response.json();
 
-    res.send(data.quote);
+    res.json({
+  "value": data.quote
+});
   } catch (error) {
     res.status(500).send("Erreur API");
   }
