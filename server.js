@@ -2,13 +2,21 @@
 const express = require("express");
 const app = express();
 
-app.use(express.json());
-
 const alphabet =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .";
 
-let quote = "HELLO WORLD";
+let quote = "";
+let binaryLetters = [];
 let position = 0;
+
+function convertQuote(text) {
+  return text.split("").map(char => {
+    let index = alphabet.indexOf(char);
+    if (index < 0) index = 63;
+
+    return index.toString(2).padStart(6, "0");
+  });
+}
 
 async function updateQuote() {
   try {
@@ -23,57 +31,33 @@ async function updateQuote() {
       .replace(/\s+/g, " ")
       .trim();
 
+    binaryLetters = convertQuote(quote);
     position = 0;
+
     console.log("New quote:", quote);
+
   } catch (error) {
-    console.log("Quote update failed");
+    console.log("Quote update failed:", error.message);
   }
 }
 
-function toBinary(letter) {
-  let index = alphabet.indexOf(letter);
-
-  if (index < 0) index = 63;
-
-  return index.toString(2).padStart(6, "0");
-}
-
+// GET : prochaine lettre en binaire
 app.get("/Return_Quote", (req, res) => {
-  res.json({
-    value: quote
-  });
-});
-
-
-app.post("/Return_Quote", (req, res) => {
-  if (req.body.value === undefined) {
-    return res.status(400).json({
-      error: "Missing value"
-    });
+  if (binaryLetters.length === 0) {
+    return res.status(503).json({ value: "000000" });
   }
 
-  if (position >= quote.length) {
-    position = 0;
-  }
+  const result = binaryLetters[position];
 
-  const letter = quote[position].toUpperCase();
-  const index = alphabet.indexOf(letter);
+  position = (position + 1) % binaryLetters.length;
 
-  const binary = (index >= 0 ? index : 63)
-    .toString(2)
-    .padStart(6, "0");
-
-  position++;
-
-  console.log("Letter:", letter, "Binary:", binary);
-
-  res.json({
-    value: binary
-  });
+  res.json({ value: result });
 });
 
-
+// Première citation
 updateQuote();
+
+// Changement toutes les 30 secondes
 setInterval(updateQuote, 30000);
 
 app.listen(process.env.PORT || 3000, "0.0.0.0");
