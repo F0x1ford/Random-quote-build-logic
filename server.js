@@ -44,6 +44,7 @@ app.get("/Return_Quote", (req, res) => {
   });
 });
 
+
 app.post("/Return_Quote", (req, res) => {
   if (req.body.value === undefined) {
     return res.status(400).json({
@@ -55,15 +56,22 @@ app.post("/Return_Quote", (req, res) => {
     position = 0;
   }
 
-  const letter = quote[position];
-  const binary = toBinary(letter);
+  const letter = quote[position].toUpperCase();
+  const index = alphabet.indexOf(letter);
+
+  const binary = (index >= 0 ? index : 63)
+    .toString(2)
+    .padStart(6, "0");
 
   position++;
+
+  console.log("Letter:", letter, "Binary:", binary);
 
   res.json({
     value: binary
   });
 });
+
 
 updateQuote();
 setInterval(updateQuote, 30000);
