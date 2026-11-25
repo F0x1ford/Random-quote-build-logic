@@ -38,6 +38,12 @@ function toBinary(letter) {
   return index.toString(2).padStart(6, "0");
 }
 
+app.get("/Return_Quote", (req, res) => {
+  res.json({
+    value: quote
+  });
+});
+
 app.post("/Return_Quote", (req, res) => {
   if (req.body.value === undefined) {
     return res.status(400).json({
