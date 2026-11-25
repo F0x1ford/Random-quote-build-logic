@@ -4,8 +4,11 @@ const app = express();
 
 app.use(express.json());
 
-let quote = "Loading...";
-let lastUpdate = 0;
+const alphabet =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .";
+
+let quote = "HELLO WORLD";
+let position = 0;
 
 async function updateQuote() {
   try {
@@ -15,39 +18,48 @@ async function updateQuote() {
 
     const data = await response.json();
 
-    quote = data.quote;
-    lastUpdate = Date.now();
+    quote = data.quote
+      .replace(/[^A-Za-z0-9 .]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
+    position = 0;
     console.log("New quote:", quote);
   } catch (error) {
     console.log("Quote update failed");
   }
 }
 
-app.get("/Return_Quote", async (req, res) => {
-  if (Date.now() - lastUpdate >= 30000) {
-    await updateQuote();
+function toBinary(letter) {
+  let index = alphabet.indexOf(letter);
+
+  if (index < 0) index = 63;
+
+  return index.toString(2).padStart(6, "0");
+}
+
+app.post("/Return_Quote", (req, res) => {
+  if (req.body.value === undefined) {
+    return res.status(400).json({
+      error: "Missing value"
+    });
   }
 
+  if (position >= quote.length) {
+    position = 0;
+  }
+
+  const letter = quote[position];
+  const binary = toBinary(letter);
+
+  position++;
+
   res.json({
-    value: quote
+    value: binary
   });
 });
 
-app.post("/Return_Quote", async (req, res) => {
-  if (Date.now() - lastUpdate >= 30000) {
-    await updateQuote();
-  }
-
-  res.json({
-    value: quote
-  });
-});
-
-// Première citation
 updateQuote();
-
-// Actualisation toutes les 30 secondes
 setInterval(updateQuote, 30000);
 
 app.listen(process.env.PORT || 3000, "0.0.0.0");
