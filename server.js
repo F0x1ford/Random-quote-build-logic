@@ -42,14 +42,19 @@ async function updateQuote() {
 }
 
 // GET : prochaine lettre en binaire
+
 app.get("/Return_Quote", (req, res) => {
   if (binaryLetters.length === 0) {
-    return res.status(503).json({ value: "000000" });
+    return res.json({ value: "finish" });
+  }
+
+  if (position >= binaryLetters.length) {
+    return res.json({ value: "finish" });
   }
 
   const result = binaryLetters[position];
 
-  position = (position + 1) % binaryLetters.length;
+  position++;
 
   res.json({ value: result });
 });
