@@ -2,17 +2,15 @@
 const express = require("express");
 const app = express();
 
-const alphabet =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .";
-
-let quote = "";
-let binaryLetters = [];
-let position = 0;
+const alphabet = "abcdefghijklmnopqrstuvwxyz1234567890";
 
 function convertQuote(text) {
-  return text.split("").map(char => {
-    let index = alphabet.indexOf(char);
-    if (index < 0) index = 63;
+  return text.toLowerCase().split("").map(char => {
+    if (char === " ") return "000000";
+
+    const index = alphabet.indexOf(char) + 1;
+
+    if (index === 0) return "000000";
 
     return index.toString(2).padStart(6, "0");
   });
